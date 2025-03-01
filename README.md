@@ -1,24 +1,66 @@
-# Data Science Template
+# Quantitative Trading Portfolio SDK
 
-This sample repo contains the recommended structure for a Python data science project. For more information on data science in VS Code, see the [Data Science Overview](https://code.visualstudio.com/docs/datascience/overview) in our docs. In this sample, we use the `pandas` and `matplotlib` libraries to perform data analysis and visualize sample data and the `pytest` library to perform tests.
+## Overview
 
-For a more in-depth tutorial, see our [data science tutorial](https://code.visualstudio.com/docs/datascience/data-science-tutorial).
+This project provides a sophisticated SDK for evaluating and managing multiple trading strategies (robots) as a cohesive portfolio for the Brazilian stock market (B3). Unlike traditional trading platforms, our approach leverages high-resolution tick data and real-time portfolio analytics to optimize trade execution.
 
-The code in this repo aims to follow Python style guidelines as outlined in [PEP 8](https://peps.python.org/pep-0008/).
+## Purpose
 
-## Running the Sample
+Traditional backtesting platforms (like Strategy Quant) rely on simplified market approximations and tend to evaluate strategies in isolation. Our SDK addresses these limitations by:
 
-To successfully run this example, we recommend the following VS Code extensions:
-- [Python](https://marketplace.visualstudio.com/items?itemName=ms-python.python)
-- [Python Debugger](https://marketplace.visualstudio.com/items?itemName=ms-python.debugpy)
-- [Pylance](https://marketplace.visualstudio.com/items?itemName=ms-python.vscode-pylance) 
+1. **Using accurate tick data** instead of unreliable OHLC data from MT5
+2. **Evaluating multiple strategies together** to understand portfolio-level dynamics
+3. **Optimizing trade exits based on collective performance** metrics like Maximum Favorable Excursion (MFE)
+4. **Providing real-time portfolio evaluation** for dynamic decision making
 
-- Open the template folder in VS Code (**File** > **Open Folder...**)
-- Create a Python virtual environment using the **Python: Create Environment** command found in the Command Palette (**View > Command Palette**). Ensure you install dependencies found in the `requirements.txt` file
-- Ensure your newly created environment is selected using the **Python: Select Interpreter** command found in the Command Palette
-- Run `calculations.py` using the Play Button in the top right corner or by selecting **Python > Python File in Terminal** from the context menu or Command Palette
-- Run `revenue_visual.py` using the Play Button in the top right corner or by selecting **Python > Python File in Terminal** from the context menu or Command Palette to generate the bar graph visual
-- To test the Python code, install `dev-requirements.txt` into your virtual environment. 
-- Navigate to the Test Panel to configure your Python test or by triggering the **Python: Configure Tests** command from the Command Palette
-- Run tests in the Test Panel or by clicking the Play Button next to the individual tests in the `test_calculations.py` file
+## Core Features
+
+- **Tick Data Integration**: Direct connection to TimescaleDB for efficient retrieval of historical and streaming tick data
+- **Multi-Strategy Evaluation**: Concurrent simulation of multiple trading robots with correlation analysis
+- **MFE-Based Exit Logic**: Dynamic trade exits based on portfolio-level Maximum Favorable Excursion
+- **Real-Time Analytics**: Continuous calculation of key risk metrics and performance indicators
+- **Modular Architecture**: Easily extendable with custom strategies and analytics
+
+## System Architecture
+
+The SDK consists of four primary components:
+
+1. **Data Layer**: Efficient tick data retrieval from TimescaleDB
+2. **Strategy Manager**: Multi-strategy simulation and position tracking
+3. **Portfolio Evaluator**: Collective performance analysis and MFE-based exit rules
+4. **Execution Module**: Trade simulation and performance reporting
+
+## Installation
+
+```bash
+# Clone the repository
+git clone https://github.com/your-username/quantitative-trading-portfolio-sdk.git
+
+# Create a Python virtual environment
+python -m venv venv
+source venv/bin/activate  # On Windows: venv\Scripts\activate
+
+# Install dependencies
+pip install -r requirements.txt
+```
+
+## Usage
+
+```python
+from data_science import TickDataProvider, StrategyManager, PortfolioEvaluator, ExecutionSimulator
+
+# Initialize components
+tick_provider = TickDataProvider("postgresql://user:password@localhost:5432/tickdb")
+strategy_manager = StrategyManager()
+portfolio_evaluator = PortfolioEvaluator(strategy_manager, {"mfe_exit_threshold": 0.3})
+execution_simulator = ExecutionSimulator(strategy_manager, portfolio_evaluator)
+
+# Register trading strategies
+strategy_manager.register_strategy("rsi_strategy", rsi_strategy_function)
+strategy_manager.register_strategy("macd_strategy", macd_strategy_function)
+
+# Run backtest with historical data
+historical_ticks = tick_provider.get_tick_range("PETR4", "2023-01-01", "2023-01-31")
+for tick in historical_ticks.to_dict('records'):
+    metrics = execution_simulator.process_tick_data(tick)
 
